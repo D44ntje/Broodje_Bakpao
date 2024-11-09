@@ -5,7 +5,7 @@ class SteamApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Steam GUI")
-        self.root.geometry("1920x1080")
+        self.root.attributes("-fullscreen", True)
         self.root.configure(bg="#171A21")
 
         style = ttk.Style()
@@ -29,6 +29,9 @@ class SteamApp:
 
         button = ttk.Button(frame, text="Start", style="TButton")
         button.pack(pady=10)
+
+        exit_button = ttk.Button(frame, text="Exit", style="TButton", command=self.root.destroy)
+        exit_button.pack(pady=10)
 
     def run(self):
         self.root.mainloop()
