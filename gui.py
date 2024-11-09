@@ -21,17 +21,47 @@ class SteamApp:
                   background=[("active", "#2A475E")],
                   foreground=[("active", "#FFFFFF")])
 
-        frame = tk.Frame(self.root, bg="#171A21")
-        frame.pack(expand=True)
+        self.frame = tk.Frame(self.root, bg="#171A21")
+        self.frame.pack(expand=True)
 
-        label = tk.Label(frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
+        label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
         label.pack(pady=20)
 
-        button = ttk.Button(frame, text="Start", style="TButton")
-        button.pack(pady=10)
+        start_button = ttk.Button(self.frame, text="Start", style="TButton", command=self.show_next_screen)
+        start_button.pack(pady=10)
 
-        exit_button = ttk.Button(frame, text="Exit", style="TButton", command=self.root.destroy)
+        exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
         exit_button.pack(pady=10)
+
+    def show_next_screen(self):
+        # Clear the existing frame
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        # Add new content to the frame
+        next_label = tk.Label(self.frame, text="This is the next screen", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
+        next_label.pack(pady=20)
+
+        back_button = ttk.Button(self.frame, text="Back", style="TButton", command=self.show_main_screen)
+        back_button.pack(pady=10)
+
+    def show_main_screen(self):
+        # Clear the current frame
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        # Recreate the main screen content
+        label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
+        label.pack(pady=20)
+
+        start_button = ttk.Button(self.frame, text="Start", style="TButton", command=self.show_next_screen)
+        start_button.pack(pady=10)
+
+        exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
+        exit_button.pack(pady=10)
+
+    def run(self):
+        self.root.mainloop()
 
     def run(self):
         self.root.mainloop()
