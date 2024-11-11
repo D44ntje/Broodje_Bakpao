@@ -82,4 +82,4 @@ noxfile.py
 # Editor directories and files
 .vscode/
 .idea/
-__pycache__/gui.cpython-312.pyc
+*.pyc
