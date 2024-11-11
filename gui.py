@@ -1,5 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
+import requests
+from io import BytesIO
+from login import open_steam_login, start_flask, set_login_callback, get_user_info
+import threading
 
 class SteamApp:
     def __init__(self):
@@ -27,41 +32,87 @@ class SteamApp:
         label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
         label.pack(pady=20)
 
-        start_button = ttk.Button(self.frame, text="Start", style="TButton", command=self.show_next_screen)
-        start_button.pack(pady=10)
+        login_button = ttk.Button(self.frame, text="Login with Steam", style="TButton", command=self.login)
+        login_button.pack(pady=10)
 
         exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
         exit_button.pack(pady=10)
 
-    def show_next_screen(self):
-        # Clear the existing frame
-        for widget in self.frame.winfo_children():
-            widget.destroy()
+        # Start Flask server
+        flask_thread = threading.Thread(target=start_flask)
+        flask_thread.daemon = True
+        flask_thread.start()
 
-        # Add new content to the frame
-        next_label = tk.Label(self.frame, text="This is the next screen", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
-        next_label.pack(pady=20)
+        # Set the login callback to display the dashboard after login
+        set_login_callback(self.show_dashboard)
 
-        back_button = ttk.Button(self.frame, text="Back", style="TButton", command=self.show_main_screen)
-        back_button.pack(pady=10)
+    def login(self):
+        """
+        Initiates Steam login process.
+        """
+        open_steam_login()
+
+    def show_dashboard(self, steam_id):
+        """
+        Displays the dashboard screen with the user's avatar, username, and Steam ID.
+        """
+        # Get the user info (username, Steam ID, and avatar URL)
+        user_info = get_user_info()
+        if user_info:
+            username = user_info["username"]
+            steam_id = user_info["steam_id"]
+            avatar_url = user_info["avatar_url"]
+
+            # Clear the current frame
+            for widget in self.frame.winfo_children():
+                widget.destroy()
+
+            # Download and display avatar image
+            avatar_image = self.download_avatar(avatar_url)
+            if avatar_image:
+                avatar_label = tk.Label(self.frame, image=avatar_image, bg="#171A21")
+                avatar_label.image = avatar_image  # Keep a reference to avoid garbage collection
+                avatar_label.pack(pady=10)
+
+            # Display username
+            username_label = tk.Label(self.frame, text=f"Username: {username}", bg="#171A21", fg="#FFFFFF", font=("Arial", 24))
+            username_label.pack(pady=10)
+
+            # Display Steam ID
+            steam_id_label = tk.Label(self.frame, text=f"Steam ID: {steam_id}", bg="#171A21", fg="#FFFFFF", font=("Arial", 24))
+            steam_id_label.pack(pady=10)
+
+            back_button = ttk.Button(self.frame, text="Log Out", style="TButton", command=self.show_main_screen)
+            back_button.pack(pady=10)
+
+    def download_avatar(self, url):
+        """
+        Downloads the avatar image from the URL and converts it to a format compatible with Tkinter.
+        """
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            image_data = Image.open(BytesIO(response.content))
+            return ImageTk.PhotoImage(image_data)
+        except requests.RequestException as e:
+            print(f"Error downloading avatar image: {e}")
+            return None
 
     def show_main_screen(self):
-        # Clear the current frame
+        """
+        Returns to the main screen.
+        """
         for widget in self.frame.winfo_children():
             widget.destroy()
 
-        # Recreate the main screen content
         label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
         label.pack(pady=20)
 
-        start_button = ttk.Button(self.frame, text="Start", style="TButton", command=self.show_next_screen)
-        start_button.pack(pady=10)
+        login_button = ttk.Button(self.frame, text="Login with Steam", style="TButton", command=self.login)
+        login_button.pack(pady=10)
 
         exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
         exit_button.pack(pady=10)
-
-    def run(self):
-        self.root.mainloop()
 
     def run(self):
         self.root.mainloop()
