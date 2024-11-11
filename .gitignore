@@ -37,6 +37,7 @@ venv.bak/
 # Ignore .env file
 .env
 
+.pyc
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 
@@ -81,3 +82,4 @@ noxfile.py
 # Editor directories and files
 .vscode/
 .idea/
+__pycache__/gui.cpython-312.pyc
