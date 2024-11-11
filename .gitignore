@@ -34,6 +34,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+# Ignore .env file
+.env
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
