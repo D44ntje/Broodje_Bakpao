@@ -63,7 +63,6 @@ class SteamApp:
         add_navigation_button(self.sidebar, "News", "icons/news.png", lambda: self.show_screen("news"))
         add_navigation_button(self.sidebar, "Settings", "icons/settings.png", lambda: self.show_screen("settings"))
 
-        ctk.CTkButton(self.sidebar, text="Log Out", command=self.logout).pack(side="bottom", pady=20)
 
     def show_screen(self, screen_name):
         self.clear_content()
@@ -74,7 +73,7 @@ class SteamApp:
         elif screen_name == "news":
             NewsScreen(self.content_frame)
         elif screen_name == "settings":
-            SettingsScreen(self.content_frame)
+            SettingsScreen(self.content_frame, self.logout)
 
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
