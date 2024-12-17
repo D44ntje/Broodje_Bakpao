@@ -1,118 +1,188 @@
-import tkinter as tk
-from tkinter import ttk
+import customtkinter as ctk
 from PIL import Image, ImageTk
 import requests
 from io import BytesIO
 from login import open_steam_login, start_flask, set_login_callback, get_user_info
 import threading
 
+# CustomTkinter appearance settings
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("dark-blue")
+
 class SteamApp:
     def __init__(self):
-        self.root = tk.Tk()
+        self.root = ctk.CTk()
         self.root.title("Steam GUI")
         self.root.attributes("-fullscreen", True)
-        self.root.configure(bg="#171A21")
 
-        style = ttk.Style()
-        style.theme_use("clam")
-        style.configure("TButton",
-                        background="#1B2838",
-                        foreground="#C5C3C0",
-                        font=("Arial", 20, "bold"),
-                        borderwidth=0,
-                        focuscolor="none")
+        # Sidebar
+        self.sidebar = None
 
-        style.map("TButton",
-                  background=[("active", "#2A475E")],
-                  foreground=[("active", "#FFFFFF")])
+        # Main Content Frame
+        self.content_frame = ctk.CTkFrame(self.root, fg_color="#171A21")
+        self.content_frame.grid(row=0, column=1, sticky="nsew")
 
-        self.frame = tk.Frame(self.root, bg="#171A21")
-        self.frame.pack(expand=True)
+        # Configure grid layout
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
 
-        label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
-        label.pack(pady=20)
-
-        login_button = ttk.Button(self.frame, text="Login with Steam", style="TButton", command=self.login)
-        login_button.pack(pady=10)
-
-        exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
-        exit_button.pack(pady=10)
+        self.show_main_screen()
 
         # Start Flask server
         flask_thread = threading.Thread(target=start_flask)
         flask_thread.daemon = True
         flask_thread.start()
 
-        # Set the login callback to display the dashboard after login
+        # Set the login callback
         set_login_callback(self.show_dashboard)
 
+    def show_main_screen(self):
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        label = ctk.CTkLabel(self.content_frame, text="Welcome to Steam", font=("Arial", 36, "bold"), text_color="white")
+        label.pack(pady=20)
+
+        login_button = ctk.CTkButton(self.content_frame, text="Login with Steam", command=self.login, height=40, width=200)
+        login_button.pack(pady=10)
+
+        exit_button = ctk.CTkButton(self.content_frame, text="Exit", command=self.root.destroy, height=40, width=200)
+        exit_button.pack(pady=10)
+
     def login(self):
-        """
-        Initiates Steam login process.
-        """
         open_steam_login()
 
     def show_dashboard(self, steam_id):
-        """
-        Displays the dashboard screen with the user's avatar, username, and Steam ID.
-        """
-        # Get the user info (username, Steam ID, and avatar URL)
         user_info = get_user_info()
         if user_info:
             username = user_info["username"]
-            steam_id = user_info["steam_id"]
             avatar_url = user_info["avatar_url"]
 
-            # Clear the current frame
-            for widget in self.frame.winfo_children():
+            for widget in self.content_frame.winfo_children():
                 widget.destroy()
 
-            # Download and display avatar image
-            avatar_image = self.download_avatar(avatar_url)
-            if avatar_image:
-                avatar_label = tk.Label(self.frame, image=avatar_image, bg="#171A21")
-                avatar_label.image = avatar_image  # Keep a reference to avoid garbage collection
-                avatar_label.pack(pady=10)
+            self.create_sidebar(username, avatar_url)
+            self.populate_main_content()
 
-            # Display username
-            username_label = tk.Label(self.frame, text=f"Username: {username}", bg="#171A21", fg="#FFFFFF", font=("Arial", 24))
-            username_label.pack(pady=10)
+    def create_sidebar(self, username, avatar_url):
+        if self.sidebar:
+            self.sidebar.destroy()
 
-            # Display Steam ID
-            steam_id_label = tk.Label(self.frame, text=f"Steam ID: {steam_id}", bg="#171A21", fg="#FFFFFF", font=("Arial", 24))
-            steam_id_label.pack(pady=10)
+        self.sidebar = ctk.CTkFrame(self.root, fg_color="#1B2838", width=300)
+        self.sidebar.grid(row=0, column=0, sticky="ns")
 
-            back_button = ttk.Button(self.frame, text="Log Out", style="TButton", command=self.show_main_screen)
-            back_button.pack(pady=10)
+        # Avatar
+        avatar_image = self.download_avatar(avatar_url)
+        if avatar_image:
+            avatar_label = ctk.CTkLabel(self.sidebar, image=avatar_image, text="")
+            avatar_label.image = avatar_image
+            avatar_label.pack(pady=20)
+
+        # Username
+        username_label = ctk.CTkLabel(self.sidebar, text=username, font=("Arial", 20), text_color="white")
+        username_label.pack(pady=10)
+
+        # Navigation Buttons with Icons
+        self.add_navigation_item("Home", "icons/home.png", self.on_home_click)
+        self.add_navigation_item("Friends", "icons/friends.png", self.on_friends_click)
+        self.add_navigation_item("News", "icons/news.png", self.on_news_click)
+        self.add_navigation_item("Settings", "icons/settings.png", self.on_settings_click)
+
+        # Logout Button
+        logout_button = ctk.CTkButton(self.sidebar, text="Log Out", command=self.logout, height=40, width=200)
+        logout_button.pack(side="bottom", pady=20)
+
+    def add_navigation_item(self, label, icon_path, command):
+        """
+        Adds a navigation button with an icon and text to the sidebar.
+        """
+        try:
+            # Load the icon image
+            icon = Image.open(icon_path).resize((20, 20))  # Resize the icon
+            icon_image = ctk.CTkImage(light_image=icon, size=(20, 20))
+
+            # Navigation button
+            nav_button = ctk.CTkButton(
+                self.sidebar,
+                image=icon_image,
+                text=label,
+                compound="top",  # Icon above the text
+                font=("Arial", 14),
+                height=80,
+                width=200,
+                fg_color="transparent",  # Transparent background
+                hover_color="#2A475E",   # Hover effect color
+                command=command
+            )
+            nav_button.image = icon_image  # Prevent garbage collection
+            nav_button.pack(pady=10)
+        except Exception as e:
+            print(f"Error loading icon '{icon_path}': {e}")
+
+    def on_home_click(self):
+        """
+        Function to handle Home button click.
+        """
+        self.populate_content("Home Screen")
+
+    def on_friends_click(self):
+        """
+        Function to handle Friends button click.
+        """
+        self.populate_content("Friends Screen")
+
+    def on_news_click(self):
+        """
+        Function to handle News button click.
+        """
+        self.populate_content("News Screen")
+
+    def on_settings_click(self):
+        """
+        Function to handle Settings button click.
+        """
+        self.populate_content("Settings Screen")
+
+    def populate_content(self, screen_name):
+        """
+        Updates the main content area with the selected screen.
+        """
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        content_label = ctk.CTkLabel(self.content_frame, text=screen_name, font=("Arial", 24), text_color="white")
+        content_label.pack(pady=20)
+
+    def populate_main_content(self):
+        """
+        Default dashboard content.
+        """
+        self.populate_content("Dashboard Content")
 
     def download_avatar(self, url):
-        """
-        Downloads the avatar image from the URL and converts it to a format compatible with Tkinter.
-        """
         try:
             response = requests.get(url)
             response.raise_for_status()
-            image_data = Image.open(BytesIO(response.content))
-            return ImageTk.PhotoImage(image_data)
+            image_data = Image.open(BytesIO(response.content)).resize((150, 150))
+            return ctk.CTkImage(light_image=image_data, size=(150, 150))
         except requests.RequestException as e:
             print(f"Error downloading avatar image: {e}")
             return None
 
-    def show_main_screen(self):
-        """
-        Returns to the main screen.
-        """
-        for widget in self.frame.winfo_children():
-            widget.destroy()
+    def logout(self):
+        global steam_id
+        steam_id = None
 
-        label = tk.Label(self.frame, text="Welcome to Steam", bg="#171A21", fg="#FFFFFF", font=("Arial", 36, "bold"))
-        label.pack(pady=20)
+        if self.sidebar:
+            self.sidebar.destroy()
+            self.sidebar = None
 
-        login_button = ttk.Button(self.frame, text="Login with Steam", style="TButton", command=self.login)
-        login_button.pack(pady=10)
-
-        exit_button = ttk.Button(self.frame, text="Exit", style="TButton", command=self.root.destroy)
-        exit_button.pack(pady=10)
+        self.show_main_screen()
 
     def run(self):
         self.root.mainloop()
+
+# Run the app
+if __name__ == "__main__":
+    app = SteamApp()
+    app.run()

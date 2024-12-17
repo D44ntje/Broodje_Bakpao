@@ -21,8 +21,8 @@ def open_steam_login():
         "https://steamcommunity.com/openid/login?"
         "openid.ns=http://specs.openid.net/auth/2.0&"
         "openid.mode=checkid_setup&"
-        "openid.return_to=http://localhost:5001/verify&"
-        "openid.realm=http://localhost:5001&"
+        "openid.return_to=http://localhost:5069/verify&"
+        "openid.realm=http://localhost:5069&"
         "openid.identity=http://specs.openid.net/auth/2.0/identifier_select&"
         "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select"
     )
@@ -82,4 +82,4 @@ def start_flask():
     """
     Starts the Flask server to listen for login callbacks.
     """
-    app.run(port=5001, host="127.0.0.1")
+    app.run(port=5069, host="127.0.0.1")
