@@ -16,7 +16,7 @@ def add_navigation_button(parent, label, icon_path, command):
             hover_color="#2A475E",
             command=command
         )
-        button.image = icon_image  # Prevent garbage collection
+        button.image = icon_image
         button.pack(pady=10)
     except Exception as e:
         print(f"Error loading navigation icon '{icon_path}': {e}")
