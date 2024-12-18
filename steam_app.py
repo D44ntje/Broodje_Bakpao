@@ -5,7 +5,7 @@ from utils.avatar_utils import download_avatar
 from utils.navigation_utils import add_navigation_button
 from screens.home_screen import HomeScreen
 from screens.friends_screen import FriendsScreen
-from screens.news_screen import NewsScreen
+from screens.game_screen import NewsScreen
 from screens.settings_screen import SettingsScreen
 
 class SteamApp:
