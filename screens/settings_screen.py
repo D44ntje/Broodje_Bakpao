@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from PIL import Image  # Import PIL for image handling
 import login
 from login import get_user_info
 import threading
@@ -37,6 +38,24 @@ class SettingsScreen:
         steam_id_text = user_info.get('steam_id', 'No Steam ID available')
         self.label2 = ctk.CTkLabel(self.frame, width=300, text=f"Steam ID: {steam_id_text}")
         self.label2.pack(pady=5)
+
+        self.label3 = ctk.CTkLabel(self.frame, width=300, text="Thank you for using us!\nFeel free to donate any amount at any time.")
+        self.label3.pack(pady=5)
+
+        # Load and display the image
+        tikkie_code = "icons/support_tikkie.png"  # Path to your image
+        try:
+            # Open the image using PIL
+            image = Image.open(tikkie_code)
+
+            # Create a CTkImage object from the loaded image
+            tikkie_image = ctk.CTkImage(light_image=image, dark_image=image, size=(250, 250))
+
+            # Create a label to display the image
+            ctk.CTkLabel(self.frame, image=tikkie_image, text="").pack(pady=20)
+
+        except Exception as e:
+            print(f"Error loading image: {e}")
 
         # Log Out button
         self.logout_button = ctk.CTkButton(parent, text="Log Out", command=self.logout)
