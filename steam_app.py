@@ -5,7 +5,7 @@ from utils.avatar_utils import download_avatar
 from utils.navigation_utils import add_navigation_button
 from screens.home_screen import HomeScreen
 from screens.friends_screen import FriendsScreen
-from screens.game_screen import NewsScreen
+from screens.game_screen import GameScreen
 from screens.settings_screen import SettingsScreen
 
 class SteamApp:
@@ -60,7 +60,7 @@ class SteamApp:
         # Navigation Buttons
         add_navigation_button(self.sidebar, "Home", "icons/home.png", lambda: self.show_screen("home"))
         add_navigation_button(self.sidebar, "Friends", "icons/friends.png", lambda: self.show_screen("friends"))
-        add_navigation_button(self.sidebar, "News", "icons/news.png", lambda: self.show_screen("news"))
+        add_navigation_button(self.sidebar, "Games", "icons/games.png", lambda: self.show_screen("games"))
         add_navigation_button(self.sidebar, "Settings", "icons/settings.png", lambda: self.show_screen("settings"))
 
 
@@ -70,8 +70,8 @@ class SteamApp:
             HomeScreen(self.content_frame)
         elif screen_name == "friends":
             FriendsScreen(self.content_frame)
-        elif screen_name == "news":
-            NewsScreen(self.content_frame)
+        elif screen_name == "games":
+            GameScreen(self.content_frame)
         elif screen_name == "settings":
             SettingsScreen(self.content_frame, self.logout)
 
