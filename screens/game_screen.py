@@ -85,62 +85,52 @@ def generate_graph():
     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
     plt.legend()
     plt.grid()
+
+    # Add bold text at the bottom of the graph
+    plt.figtext(0.5, -0.1,
+                "This graph indicates the coherence between the amount of players in each game and the price of the game. "
+                "The blue dots indicate each game in the Steam store, and the red line indicates the AI prediction of what the price should be based on the amount of players playing a game.",
+                wrap=True, horizontalalignment='center', fontsize=10, fontweight='bold')
+
     plt.savefig('predicted_prices_plot.png', format='png', bbox_inches='tight')
     plt.close()
 
 class GameScreen:
     def __init__(self, parent):
-        ctk.CTkLabel(parent, text="Game Screen", font=("Arial", 24), text_color="white").pack(pady=20)
+        ctk .CTkLabel(parent, text="Game Screen", font=("Arial", 24), text_color="white").pack(pady=20)
 
         self.search_bar = ctk.CTkEntry(parent, placeholder_text="Search for a game...")
         self.search_bar.pack(pady=(0, 20), padx=10, fill="x")
 
         self.add_expanding_segment(parent, "Recommended by friends", "This section shows games recommended by your friends.")
-        self.add_expanding_segment(parent, "Top 10 worldwide", "Explore the top 10 trending games worldwide.")
+        self.add_expanding_segment(parent, "Top 5 worldwide", "Explore the top 5 trending games worldwide.")
 
         # Generate and display the graph
         generate_graph()
         self.display_graph(parent)
 
     def add_expanding_segment(self, parent, title, description):
-        segment_frame = ctk.CTkFrame(parent, fg_color="#2A475E", corner_radius=15)
+        segment_frame = ctk.CTkFrame(parent)
         segment_frame.pack(pady=10, padx=10, fill="x")
 
-        ctk.CTkLabel(
-            segment_frame,
-            text=title,
-            font=("Arial", 16, "bold"),
-            text_color="white",
-            anchor="w"
-        ).pack(side="top", padx=10, pady=(10, 5), fill="x")
+        title_label = ctk.CTkLabel(segment_frame, text=title, font=("Arial", 18), text_color="white")
+        title_label.pack(anchor="w", padx=10)
 
-        ctk.CTkLabel(
-            segment_frame,
-            text=description,
-            font=("Arial", 12),
-            text_color="lightgray",
-            anchor="w",
-            wraplength=600
-        ).pack(side="top", padx=10, pady=(0, 10), fill="x")
+        description_label = ctk.CTkLabel(segment_frame, text=description, font=("Arial", 12), text_color="white")
+        description_label.pack(anchor="w", padx=10)
 
     def display_graph(self, parent):
-        # Load the saved image
-        image = Image.open('predicted_prices_plot.png')
-        photo = ImageTk.PhotoImage(image)
+        # Load the saved graph image
+        graph_image = Image.open('predicted_prices_plot.png')
+        graph_photo = ImageTk.PhotoImage(graph_image)
 
-        # Create a label to display the image
-        graph_label = ctk.CTkLabel(parent, image=photo)
-        graph_label.image = photo  # Keep a reference to avoid garbage collection
+        graph_label = ctk.CTkLabel(parent, image=graph_photo)
+        graph_label.image = graph_photo  # Keep a reference to avoid garbage collection
         graph_label.pack(pady=20)
 
-    def recommended_by_friends(self):
-        print("Recommended by friends clicked")
-
-    def top_10_worldwide(self):
-        print("Top 10 worldwide clicked")
-
-# Example usage
 if __name__ == "__main__":
     root = ctk.CTk()
+    root.title("Game Price Predictor")
+    root.geometry("800x600")
     GameScreen(root)
     root.mainloop()
