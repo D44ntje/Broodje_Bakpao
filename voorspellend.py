@@ -111,6 +111,7 @@ plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
 plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
 plt.legend()
 plt.grid()
+plt.savefig('voorspellende_plot.png', format= 'png', bbox_inches='tight')
 plt.show()
 
 print("\nPrice by AI is based on the calculation, y= b _0 + b_1·x, with use of linear regression.")
