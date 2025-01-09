@@ -10,7 +10,6 @@ from helpers.databasehelper import DatabaseHelper
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
 
-
 class SteamApp:
     def __init__(self):
         self.root = ctk.CTk()
@@ -156,6 +155,12 @@ class SteamApp:
         self.password_entry = ctk.CTkEntry(login_frame, width=250, height=35, show="*")
         self.password_entry.pack(pady=5)
 
+        # Navigation Buttons
+        add_navigation_button(self.sidebar, "Home", "icons/home.png", lambda: self.show_screen("home"))
+        add_navigation_button(self.sidebar, "Friends", "icons/friends.png", lambda: self.show_screen("friends"))
+        add_navigation_button(self.sidebar, "Games", "icons/games.png", lambda: self.show_screen("games"))
+        add_navigation_button(self.sidebar, "Settings", "icons/settings.png", lambda: self.show_screen("settings"))
+
         login_button = ctk.CTkButton(login_frame, text="Login", command=self.admin_login_attempt, height=40, width=200)
         login_button.pack(pady=10)
 
@@ -179,6 +184,14 @@ class SteamApp:
 
     def populate_content(self, screen_name):
         self.clear_content()
+        if screen_name == "home":
+            HomeScreen(self.content_frame)
+        elif screen_name == "friends":
+            FriendsScreen(self.content_frame)
+        elif screen_name == "games":
+            GameScreen(self.content_frame)
+        elif screen_name == "settings":
+            SettingsScreen(self.content_frame, self.logout)
         content_label = ctk.CTkLabel(self.content_frame, text=screen_name, font=("Arial", 24), text_color="white")
         content_label.pack(pady=20)
 
