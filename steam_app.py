@@ -6,10 +6,12 @@ from login import open_steam_login, start_flask, set_login_callback, get_rfid_us
 import threading
 from screens.admin_dashboard_screen import AdminDashboardScreen
 from helpers.databasehelper import DatabaseHelper
+from utils.navigation_utils import add_navigation_button
 from screens.game_screen import GameScreen
 from screens.home_screen import HomeScreen
 from screens.friends_screen import FriendsScreen
 from screens.settings_screen import SettingsScreen
+import os
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
@@ -113,20 +115,30 @@ class SteamApp:
         self.sidebar = ctk.CTkFrame(self.root, fg_color="#1B2838", width=300)
         self.sidebar.grid(row=0, column=0, sticky="ns")
 
+        # Avatar
         avatar_image = self.download_avatar(avatar_url)
         if avatar_image:
             avatar_label = ctk.CTkLabel(self.sidebar, image=avatar_image, text="")
             avatar_label.image = avatar_image
             avatar_label.pack(pady=20)
 
+        # Username
         username_label = ctk.CTkLabel(self.sidebar, text=username, font=("Arial", 20), text_color="white")
         username_label.pack(pady=10)
 
-        self.add_navigation_button("Home", lambda: self.populate_content("home"))
-        self.add_navigation_button("Friends", lambda: self.populate_content("friends"))
-        self.add_navigation_button("Games", lambda: self.populate_content("games"))
-        self.add_navigation_button("Settings", lambda: self.populate_content("settings"))
+        # Add navigation buttons with icons
+        icons_dir = os.path.join(os.path.dirname(__file__), "icons")
 
+        add_navigation_button(self.sidebar, "Home", os.path.join(icons_dir, "home.png"),
+                              lambda: self.populate_content("home"))
+        add_navigation_button(self.sidebar, "Friends", os.path.join(icons_dir, "friends.png"),
+                              lambda: self.populate_content("friends"))
+        add_navigation_button(self.sidebar, "Games", os.path.join(icons_dir, "games.png"),
+                              lambda: self.populate_content("games"))
+        add_navigation_button(self.sidebar, "Settings", os.path.join(icons_dir, "settings.png"),
+                              lambda: self.populate_content("settings"))
+
+        # Logout button
         logout_button = ctk.CTkButton(self.sidebar, text="Log Out", command=self.logout, height=40, width=200)
         logout_button.pack(side="bottom", pady=20)
 
