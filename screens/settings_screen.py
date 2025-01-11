@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
-from login import get_user_info
+from login import fetch_user_info
 
 class SettingsScreen:
     def __init__(self, parent, logout_callback):
@@ -35,7 +35,7 @@ class SettingsScreen:
 
     def get_user_information(self):
         try:
-            user_info = get_user_info()
+            user_info = fetch_user_info()
             if user_info:
                 return user_info
             return {}
