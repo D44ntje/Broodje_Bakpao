@@ -5,7 +5,6 @@ from matplotlib.ticker import MaxNLocator
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
-# Function to generate the graph and save it as an image
 def generate_graph():
     json_file_path = r'C:\Users\Gebruiker\OneDrive - ASG\Documenten\HU\steam.json'
 
@@ -90,7 +89,6 @@ def generate_graph():
 
     return all_games_data, b0, b1
 
-# Function to get the top 5 most popular and most expensive games
 def get_top_games(all_games_data, b0, b1):
     def predict(x):
         return b0 + b1 * x
@@ -116,29 +114,16 @@ class GameScreen:
 
         ctk.CTkLabel(self.scrollable_frame, text="Game Screen", font=("Arial", 24), text_color="white").pack(pady=20)
 
-        # Generate graph and top games data
         all_games_data, b0, b1 = generate_graph()
         self.most_popular_games, self.most_expensive_games = get_top_games(all_games_data, b0, b1)
 
-        # Create a frame for the top games and recommended section
         self.top_games_frame = ctk.CTkFrame(self.scrollable_frame, width=400, height=200)
         self.top_games_frame.pack(pady=10, padx=10, fill="x", expand=False)
 
-        self.add_expanding_segment("Recommended by friends", "This section shows games recommended by your friends.")
-        self.add_top_games_segment("Top 5 worldwide", self.most_popular_games)
+        self.add_top_games_segment("Top 5 Most Popular Games", self.most_popular_games)
+        self.add_top_games_segment("Top 5 Most Expensive Games", self.most_expensive_games)
 
-        # Display the graph
         self.display_graph()
-
-    def add_expanding_segment(self, title, description):
-        segment_frame = ctk.CTkFrame(self.top_games_frame, width=400, height=200)
-        segment_frame.pack(pady=10, padx=10, fill="x", expand=False)
-
-        title_label = ctk.CTkLabel(segment_frame, text=title, font=("Arial", 18), text_color="white")
-        title_label.pack(anchor="w", padx=10)
-
-        description_label = ctk.CTkLabel(segment_frame, text=description, font=("Arial", 12), text_color="white")
-        description_label.pack(anchor="w", padx=10)
 
     def add_top_games_segment(self, title, games):
         segment_frame = ctk.CTkFrame(self.top_games_frame, width=400, height=200)
@@ -152,17 +137,9 @@ class GameScreen:
             game_label.pack(anchor="w", padx=10)
 
     def display_graph(self):
-        # Load the saved graph image
         graph_image = Image.open('predicted_prices_plot.png')
         graph_photo = ImageTk.PhotoImage(graph_image)
 
         graph_label = ctk.CTkLabel(self.scrollable_frame, image=graph_photo)
-        graph_label.image = graph_photo  # Keep a reference to avoid garbage collection
+        graph_label.image = graph_photo
         graph_label.pack(pady=20, anchor="center")
-
-if __name__ == "__main__":
-    root = ctk.CTk()
-    root.title("Game Price Predictor")
-    root.geometry("800x600")
-    GameScreen(root)
-    root.mainloop()
