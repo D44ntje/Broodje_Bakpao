@@ -5,14 +5,13 @@ from matplotlib.ticker import MaxNLocator
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import os
+import webbrowser
+
 
 class GameScreen:
     def __init__(self, parent):
         self.parent = parent
         ctk.CTkLabel(parent, text="Game Screen", font=("Arial", 24), text_color="white").pack(pady=20)
-
-        self.search_bar = ctk.CTkEntry(parent, placeholder_text="Search for a game...")
-        self.search_bar.pack(pady=(0, 20), padx=10, fill="x")
 
         self.add_expanding_segment(parent, "Recommended by friends", "This section shows games recommended by your friends.")
 
@@ -150,9 +149,30 @@ class GameScreen:
         title_label = ctk.CTkLabel(segment_frame, text=title, font=("Arial", 18), text_color="white")
         title_label.pack(anchor="w", padx=10)
 
-        for game in games:
-            game_label = ctk.CTkLabel(segment_frame, text=f"{game[0]} (Owners: {game[1]}, Price: {game[2]}, Predicted: {game[3]:.2f})", font=("Arial", 12), text_color="white")
-            game_label.pack(anchor="w", padx=10)
+        urls = [
+            "https://store.steampowered.com/app/570/Dota_2/",
+            "https://store.steampowered.com/app/1063730/New_World_Aeternum/",
+            "https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/",
+            "https://store.steampowered.com/app/440/Team_Fortress_2/",
+            "https://store.steampowered.com/app/10/CounterStrike/"
+        ]
+
+        for idx, game in enumerate(games):
+            row_frame = ctk.CTkFrame(segment_frame)
+            row_frame.pack(fill="x", padx=10, pady=5)
+
+            game_label = ctk.CTkLabel(row_frame,
+                                      text=f"{game[0]} (Owners: {game[1]}, Price: {game[2]}, Predicted: {game[3]:.2f})",
+                                      font=("Arial", 12), text_color="white")
+            game_label.pack(side="left", padx=10)
+
+            info_button = ctk.CTkButton(
+                row_frame,
+                text="Click for more information!",
+                width=200,
+                command=lambda url=urls[idx]: webbrowser.open(url)
+            )
+            info_button.pack(side="right", padx=10)
 
     def display_graph(self, parent):
         """
@@ -164,3 +184,5 @@ class GameScreen:
         graph_label = ctk.CTkLabel(parent, image=graph_photo)
         graph_label.image = graph_photo  # Keep a reference to avoid garbage collection
         graph_label.pack(pady=20)
+
+
