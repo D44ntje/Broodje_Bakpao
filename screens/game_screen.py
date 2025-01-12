@@ -29,7 +29,7 @@ class GameScreen:
         """
         Generates a graph based on game data and saves it as an image.
         """
-        json_file_path = os.path.join(os.path.dirname(__file__), "../steam.json")  # Relative path to steam.json
+        json_file_path = os.path.join(os.path.dirname(__file__), "../steam.json")
 
         with open(json_file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)

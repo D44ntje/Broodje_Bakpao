@@ -2,7 +2,10 @@ import requests
 import customtkinter as ctk
 import webbrowser
 from html import unescape
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
+import warnings
+
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 class HomeScreen:
     def __init__(self, parent):
@@ -12,25 +15,18 @@ class HomeScreen:
         self.main_frame = ctk.CTkFrame(parent, fg_color="#171A21")
         self.main_frame.grid(row=0, column=0, sticky="nsew")
 
-        self.main_frame.grid_rowconfigure(0, weight=0)
-        self.main_frame.grid_rowconfigure(1, weight=1)
-        self.main_frame.grid_columnconfigure((0, 1), weight=1)
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
 
-        title = ctk.CTkLabel(self.main_frame, text="Home Screen", font=("Arial", 24, "bold"), text_color="white")
-        title.grid(row=0, column=0, columnspan=2, pady=(10, 20), sticky="n")
+        section_frame = ctk.CTkFrame(self.main_frame, fg_color="#1B2838", corner_radius=10)
+        section_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-        self.create_sections()
+        ctk.CTkLabel(section_frame, text="Latest News", font=("Arial", 25), text_color="white").pack(pady=10)
 
-    def create_sections(self):
-        section1 = ctk.CTkFrame(self.main_frame, fg_color="#1B2838", corner_radius=10)
-        section1.grid(row=1, column=0, padx=10, pady=10, sticky="nsew", columnspan=2)
-
-        ctk.CTkLabel(section1, text="Latest News", font=("Arial", 25), text_color="white").pack(pady=10)
-
-        self.scrollable_frame = ctk.CTkScrollableFrame(section1, width=400, fg_color="#171A21", corner_radius=10)
+        self.scrollable_frame = ctk.CTkScrollableFrame(section_frame, width=600, height=400, fg_color="#171A21", corner_radius=10)
         self.scrollable_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        self.refresh_button = ctk.CTkButton(section1, text="Refresh", command=self.refresh_news)
+        self.refresh_button = ctk.CTkButton(section_frame, text="Refresh", command=self.refresh_news)
         self.refresh_button.place(relx=0.98, rely=0.02, anchor="ne")
 
         self.load_steam_news()
@@ -66,7 +62,7 @@ class HomeScreen:
                         ctk.CTkLabel(article_frame, text=title, font=("Arial", 20, "bold"), text_color="white").pack(pady=5)
 
                         content = self.strip_html(article['contents'])
-                        ctk.CTkLabel(article_frame, text=content, font=("Arial", 12), text_color="white", wraplength=380).pack(pady=5)
+                        ctk.CTkLabel(article_frame, text=content, font=("Arial", 12), text_color="white", wraplength=580).pack(pady=5)
 
                         link_button = ctk.CTkButton(article_frame, text="Read More", command=lambda url=article['url']: webbrowser.open(url))
                         link_button.pack(pady=5)

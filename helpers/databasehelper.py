@@ -8,7 +8,7 @@ class DatabaseHelper:
     @contextmanager
     def connect(self):
         """
-        Manager for database connection.
+        Helper for database connection.
         """
         connection = psycopg2.connect(**self.db_config)
         cursor = connection.cursor()
