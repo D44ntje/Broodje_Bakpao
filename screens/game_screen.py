@@ -5,9 +5,7 @@ from matplotlib.ticker import MaxNLocator
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
-def generate_graph():
-    json_file_path = r'C:\Users\Gebruiker\OneDrive - ASG\Documenten\HU\steam.json'
-
+def generate_graph(json_file_path):
     with open(json_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
 
@@ -44,7 +42,7 @@ def generate_graph():
     X = []
     for owner in owners:
         if ' - ' in owner:
-            lower_bound = int(owner.split(' - ')[0])
+            lower_bound = int(owner.split(' - ')[0].replace(',', ''))
             X.append(lower_bound)
         else:
             X.append(int(owner.replace(',', '')))
@@ -63,7 +61,7 @@ def generate_graph():
     predictions = []
     for owner in owners:
         if ' - ' in owner:
-            lower_bound = int(owner.split(' - ')[0])
+            lower_bound = int(owner.split(' - ')[0].replace(',', ''))
             predictions.append(predict(lower_bound))
         else:
             predictions.append(predict(int(owner.replace(',', ''))))
@@ -77,7 +75,7 @@ def generate_graph():
     plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True, nbins=12))
     plt.legend()
-    plt.grid()
+    plt .grid()
 
     plt.figtext(0.5, -0.1,
                 "This graph indicates the coherence between the amount of players in each game and the price of the game. "
@@ -108,38 +106,44 @@ def get_top_games(all_games_data, b0, b1):
     return most_popular_games, most_expensive_games
 
 class GameScreen:
-    def __init__(self, parent):
+    def __init__(self, parent, json_file_path):
         self.scrollable_frame = ctk.CTkScrollableFrame(parent, width=800, height=600)
         self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-        ctk.CTkLabel(self.scrollable_frame, text="Game Screen", font=("Arial", 24), text_color="white").pack(pady=20)
-
-        all_games_data, b0, b1 = generate_graph()
+        all_games_data, b0, b1 = generate_graph(json_file_path)
         self.most_popular_games, self.most_expensive_games = get_top_games(all_games_data, b0, b1)
 
-        self.top_games_frame = ctk.CTkFrame(self.scrollable_frame, width=400, height=200)
-        self.top_games_frame.pack(pady=10, padx=10, fill="x", expand=False)
+        self.display_games()
+        self.display_graph()  # Call the method to display the graph
 
-        self.add_top_games_segment("Top 5 Most Popular Games", self.most_popular_games)
-        self.add_top_games_segment("Top 5 Most Expensive Games", self.most_expensive_games)
+    def display_games(self):
+        # Display Most Popular Games
+        ctk.CTkLabel(self.scrollable_frame, text="Most Popular Games", font=("Arial", 16)).pack(pady=10, anchor="w")  # Align to the left
+        for game in self.most_popular_games:
+            name, owners, price, predicted_price = game
+            ctk.CTkLabel(self.scrollable_frame,
+                         text=f"{name} - Owners: {owners} - Price: {price} - Predicted Price: {predicted_price:.2f}").pack(
+                pady=5, anchor="w")  # Align to the left
 
-        self.display_graph()
-
-    def add_top_games_segment(self, title, games):
-        segment_frame = ctk.CTkFrame(self.top_games_frame, width=400, height=200)
-        segment_frame.pack(pady=10, padx=10, fill="x", expand=False)
-
-        title_label = ctk.CTkLabel(segment_frame, text=title, font=("Arial", 18), text_color="white")
-        title_label.pack(anchor="w", padx=10)
-
-        for game in games:
-            game_label = ctk.CTkLabel(segment_frame, text=f"{game[0]} (Owners: {game[1]}, Price: {game[2]}, Predicted: {game[3]:.2f})", font=("Arial", 12), text_color="white")
-            game_label.pack(anchor="w", padx=10)
+        # Display Most Expensive Games
+        ctk.CTkLabel(self.scrollable_frame, text="Most Expensive Games", font=("Arial", 16)).pack(pady=10, anchor="w")  # Align to the left
+        for game in self.most_expensive_games:
+            name, owners, price, predicted_price = game
+            ctk.CTkLabel(self.scrollable_frame,
+                         text=f"{name} - Owners: {owners} - Price: {price} - Predicted Price: {predicted_price:.2f}").pack(
+                pady=5, anchor="w")  # Align to the left
 
     def display_graph(self):
+        # Load the graph image
         graph_image = Image.open('predicted_prices_plot.png')
         graph_photo = ImageTk.PhotoImage(graph_image)
 
+        # Create a label to display the graph
         graph_label = ctk.CTkLabel(self.scrollable_frame, image=graph_photo)
-        graph_label.image = graph_photo
+        graph_label.image = graph_photo  # Keep a reference to avoid garbage collection
         graph_label.pack(pady=20, anchor="center")
+
+json_file_path = 'steam.json'  # Ensure this path is correct
+root = ctk.CTk()  # Create the main application window
+app = GameScreen(root, json_file_path)  # Initialize the GameScreen with the root window and JSON file path
+root.mainloop()  # Start the application loop
