@@ -32,6 +32,7 @@ class SteamApp:
         self.db_helper = DatabaseHelper(self.db_config)
 
         self.sidebar = None
+        self.current_steam_id = None
 
         self.content_frame = ctk.CTkFrame(self.root, fg_color="#171A21")
         self.content_frame.grid(row=0, column=1, sticky="nsew")
@@ -92,6 +93,9 @@ class SteamApp:
             self.display_error_message("Failed to retrieve RFID login or user info.")
 
     def display_error_message(self, message):
+        """
+        Display an error message in the content frame.
+        """
         self.clear_content()
         error_label = ctk.CTkLabel(self.content_frame, text=message, font=("Arial", 14), text_color="red")
         error_label.pack(pady=10)
@@ -100,6 +104,7 @@ class SteamApp:
         """
         Displays the main dashboard after Steam login.
         """
+        self.current_steam_id = user_info["steam_id"]
         username = user_info["username"]
         avatar_url = user_info["avatar_url"]
 
@@ -109,6 +114,9 @@ class SteamApp:
         HomeScreen(self.content_frame)
 
     def create_sidebar(self, username, avatar_url):
+        """
+        Create the sidebar with navigation buttons and user info.
+        """
         if self.sidebar:
             self.sidebar.destroy()
 
@@ -126,7 +134,7 @@ class SteamApp:
         username_label = ctk.CTkLabel(self.sidebar, text=username, font=("Arial", 20), text_color="white")
         username_label.pack(pady=10)
 
-        # Add navigation buttons with icons
+        # Navigation
         icons_dir = os.path.join(os.path.dirname(__file__), "icons")
 
         add_navigation_button(self.sidebar, "Home", os.path.join(icons_dir, "home.png"),
@@ -142,18 +150,27 @@ class SteamApp:
         logout_button = ctk.CTkButton(self.sidebar, text="Log Out", command=self.logout, height=40, width=200)
         logout_button.pack(side="bottom", pady=20)
 
-    def add_navigation_button(self, label, command):
-        button = ctk.CTkButton(
-            self.sidebar,
-            text=label,
-            font=("Arial", 14),
-            fg_color="transparent",
-            hover_color="#2A475E",
-            command=command
-        )
-        button.pack(pady=10)
+    def populate_content(self, screen_name):
+        """
+        Populate the main content area based on the selected screen.
+        """
+        self.clear_content()
+        if screen_name == "home":
+            HomeScreen(self.content_frame)
+        elif screen_name == "friends":
+            if self.current_steam_id:
+                FriendsScreen(self.content_frame, self.current_steam_id)
+            else:
+                self.display_error_message("Please log in to view your friends.")
+        elif screen_name == "games":
+            GameScreen(self.content_frame)
+        elif screen_name == "settings":
+            SettingsScreen(self.content_frame, self.current_steam_id, self.logout)
 
     def show_admin_login(self):
+        """
+        Display the admin login screen.
+        """
         self.clear_content()
 
         login_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
@@ -193,22 +210,17 @@ class SteamApp:
             else:
                 self.display_error_message("Invalid credentials! Please try again.")
 
-    def populate_content(self, screen_name):
-        self.clear_content()
-        if screen_name == "home":
-            HomeScreen(self.content_frame)
-        elif screen_name == "friends":
-            FriendsScreen(self.content_frame)
-        elif screen_name == "games":
-            GameScreen(self.content_frame)
-        elif screen_name == "settings":
-            SettingsScreen(self.content_frame, self.logout)
-
     def clear_content(self):
+        """
+        Clear all widgets from the content frame.
+        """
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
     def download_avatar(self, url):
+        """
+        Download and return the avatar image.
+        """
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -218,12 +230,19 @@ class SteamApp:
             return None
 
     def logout(self):
+        """
+        Log out the user and return to the main screen.
+        """
         if self.sidebar:
             self.sidebar.destroy()
             self.sidebar = None
+        self.current_steam_id = None
         self.show_main_screen()
 
     def run(self):
+        """
+        Run the main event loop.
+        """
         self.root.mainloop()
 
 

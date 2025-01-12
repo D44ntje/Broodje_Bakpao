@@ -14,7 +14,8 @@
 ### pip3 install requests (Voor API requests)
 ### pip3 install pillow (Voor images)
 ### pip3 install psycopg2-binary (Voor database)
-
+### pip3 install bs4 (Voor iets wat Daan heeft gemaakt)
+### pip3 install matplotlib (Voor iets wat Ayden heeft gemaakt)
 
 # Database query
 ### -- Create the admin_users table
