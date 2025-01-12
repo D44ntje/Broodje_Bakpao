@@ -85,7 +85,7 @@ def log_user_login(user_info):
 def verify():
     """
     Callback route for Steam OpenID verification.
-    Extracts the Steam ID, fetches user info, logs the login, and calls our login callback.
+    Extracts the Steam ID, fetches user info, logs the login, and calls the login callback.
     """
     global steam_id
     steam_id_url = request.args.get("openid.claimed_id")

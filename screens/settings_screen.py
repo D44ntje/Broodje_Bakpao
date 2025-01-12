@@ -39,7 +39,6 @@ class SettingsScreen:
         ctk.CTkLabel(content_frame, text="Thank you for using our platform!\nFeel free to donate any amount at any time.",
                      font=("Arial", 14), text_color="white").pack(pady=10)
 
-        # Try loading the Tikkie donation QR code image
         tikkie_code = "icons/support_tikkie.png"
         try:
             image = Image.open(tikkie_code)

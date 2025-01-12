@@ -12,6 +12,7 @@ from screens.home_screen import HomeScreen
 from screens.friends_screen import FriendsScreen
 from screens.settings_screen import SettingsScreen
 import os
+from utils.avatar_utils import download_avatar
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
@@ -20,7 +21,7 @@ class SteamApp:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Steam GUI")
-        self.root.geometry("1200x800")
+        self.root.geometry("1920x1080")
         self.root.resizable(True, True)
 
         self.db_config = {
@@ -115,7 +116,7 @@ class SteamApp:
 
     def create_sidebar(self, username, avatar_url):
         """
-        Create the sidebar with navigation buttons and user info.
+        Creates the sidebar with navigation buttons and user info.
         """
         if self.sidebar:
             self.sidebar.destroy()
@@ -123,18 +124,15 @@ class SteamApp:
         self.sidebar = ctk.CTkFrame(self.root, fg_color="#1B2838", width=300)
         self.sidebar.grid(row=0, column=0, sticky="ns")
 
-        # Avatar
-        avatar_image = self.download_avatar(avatar_url)
+        avatar_image = download_avatar(avatar_url)
         if avatar_image:
             avatar_label = ctk.CTkLabel(self.sidebar, image=avatar_image, text="")
             avatar_label.image = avatar_image
             avatar_label.pack(pady=20)
 
-        # Username
         username_label = ctk.CTkLabel(self.sidebar, text=username, font=("Arial", 20), text_color="white")
         username_label.pack(pady=10)
 
-        # Navigation
         icons_dir = os.path.join(os.path.dirname(__file__), "icons")
 
         add_navigation_button(self.sidebar, "Home", os.path.join(icons_dir, "home.png"),
@@ -146,13 +144,16 @@ class SteamApp:
         add_navigation_button(self.sidebar, "Settings", os.path.join(icons_dir, "settings.png"),
                               lambda: self.populate_content("settings"))
 
-        # Logout button
-        logout_button = ctk.CTkButton(self.sidebar, text="Log Out", command=self.logout, height=40, width=200)
-        logout_button.pack(side="bottom", pady=20)
+        logout_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        logout_frame.pack(side="bottom", padx=20, pady=20,
+                          fill="x")  # Add horizontal (padx) and vertical (pady) padding
+
+        logout_button = ctk.CTkButton(logout_frame, text="Log Out", command=self.logout, height=40, width=200)
+        logout_button.pack(pady=10)
 
     def populate_content(self, screen_name):
         """
-        Populate the main content area based on the selected screen.
+        Populates the main content area based on the selected screen.
         """
         self.clear_content()
         if screen_name == "home":
@@ -173,26 +174,28 @@ class SteamApp:
         """
         self.clear_content()
 
-        login_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
-        login_frame.grid(row=1, column=0, sticky="nsew")
+        self.login_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        self.login_frame.grid(row=1, column=0, sticky="nsew")
 
-        admin_label = ctk.CTkLabel(login_frame, text="Admin Panel Login", font=("Arial", 28, "bold"), text_color="white")
+        admin_label = ctk.CTkLabel(self.login_frame, text="Admin Panel Login", font=("Arial", 28, "bold"),
+                                   text_color="white")
         admin_label.pack(pady=20)
 
-        username_label = ctk.CTkLabel(login_frame, text="Username:", font=("Arial", 16), text_color="white")
+        username_label = ctk.CTkLabel(self.login_frame, text="Username:", font=("Arial", 16), text_color="white")
         username_label.pack(pady=5)
-        self.username_entry = ctk.CTkEntry(login_frame, width=250, height=35)
+        self.username_entry = ctk.CTkEntry(self.login_frame, width=250, height=35)
         self.username_entry.pack(pady=5)
 
-        password_label = ctk.CTkLabel(login_frame, text="Password:", font=("Arial", 16), text_color="white")
+        password_label = ctk.CTkLabel(self.login_frame, text="Password:", font=("Arial", 16), text_color="white")
         password_label.pack(pady=5)
-        self.password_entry = ctk.CTkEntry(login_frame, width=250, height=35, show="*")
+        self.password_entry = ctk.CTkEntry(self.login_frame, width=250, height=35, show="*")
         self.password_entry.pack(pady=5)
 
-        login_button = ctk.CTkButton(login_frame, text="Login", command=self.admin_login_attempt, height=40, width=200)
+        login_button = ctk.CTkButton(self.login_frame, text="Login", command=self.admin_login_attempt, height=40,
+                                     width=200)
         login_button.pack(pady=10)
 
-        back_button = ctk.CTkButton(login_frame, text="Back", command=self.show_main_screen, height=40, width=200)
+        back_button = ctk.CTkButton(self.login_frame, text="Back", command=self.show_main_screen, height=40, width=200)
         back_button.pack(pady=10)
 
     def admin_login_attempt(self):
@@ -206,9 +209,18 @@ class SteamApp:
             cursor.execute("SELECT * FROM admin_users WHERE username = %s AND password = %s", (username, password))
             if cursor.fetchone():
                 self.clear_content()
-                AdminDashboardScreen(self.content_frame, self.db_helper)
+                AdminDashboardScreen(self.content_frame, self.db_helper, self.show_main_screen)
             else:
-                self.display_error_message("Invalid credentials! Please try again.")
+                if hasattr(self, 'error_label') and self.error_label is not None:
+                    self.error_label.destroy()
+
+                self.error_label = ctk.CTkLabel(
+                    self.login_frame,
+                    text="Invalid credentials! Please try again.",
+                    font=("Arial", 14),
+                    text_color="red"
+                )
+                self.error_label.pack(pady=10)
 
     def clear_content(self):
         """
@@ -216,18 +228,6 @@ class SteamApp:
         """
         for widget in self.content_frame.winfo_children():
             widget.destroy()
-
-    def download_avatar(self, url):
-        """
-        Download and return the avatar image.
-        """
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            image_data = Image.open(BytesIO(response.content)).resize((150, 150))
-            return ctk.CTkImage(light_image=image_data, size=(150, 150))
-        except requests.RequestException:
-            return None
 
     def logout(self):
         """
