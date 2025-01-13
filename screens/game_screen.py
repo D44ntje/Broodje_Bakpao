@@ -22,8 +22,8 @@ class GameScreen:
         self.main_frame.grid_rowconfigure(1, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
 
-        self.add_expanding_segment(self.main_frame, "Recommended by friends",
-                                   "This section shows games recommended by your friends.", row=0)
+        self.add_expanding_segment(self.main_frame, "Top 5 most expensive games",
+                                   "This section shows the top 5 most expensive games in the steam store", row=0)
 
         section_frame = ctk.CTkFrame(self.main_frame, fg_color="#1B2838", corner_radius=10)
         section_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
@@ -174,3 +174,12 @@ class GameScreen:
         graph_label = ctk.CTkLabel(graph_frame, image=graph_photo, text="")
         graph_label.image = graph_photo
         graph_label.pack()
+def main():
+    root = ctk.CTk()
+    root.title("Game Recommendation System")
+    root.geometry("900x700")
+    app = GameScreen(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
