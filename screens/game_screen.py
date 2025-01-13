@@ -7,7 +7,6 @@ from PIL import Image, ImageTk
 import os
 import webbrowser
 
-
 class GameScreen:
     def __init__(self, parent):
         self.parent = parent
@@ -22,9 +21,6 @@ class GameScreen:
         self.main_frame.grid_rowconfigure(1, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
 
-        self.add_expanding_segment(self.main_frame, "Recommended by friends",
-                                   "This section shows games recommended by your friends.", row=0)
-
         section_frame = ctk.CTkFrame(self.main_frame, fg_color="#1B2838", corner_radius=10)
         section_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
@@ -35,6 +31,7 @@ class GameScreen:
         self.most_popular_games, self.most_expensive_games = self.get_top_games(all_games_data, b0, b1)
 
         self.add_top_games_segment(self.scrollable_frame, "Top 5 worldwide", self.most_popular_games)
+        self.add_top_games_segment(self.scrollable_frame, "Top 5 most expensive", self.most_expensive_games)
         self.display_graph(self.scrollable_frame)
 
     def generate_graph(self):
@@ -137,11 +134,11 @@ class GameScreen:
         title_label.pack(anchor="w", padx=10)
 
         urls = [
-            "https://store.steampowered.com/app/570/Dota_2/",
-            "https://store.steampowered.com/app/1063730/New_World_Aeternum/",
-            "https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/",
-            "https://store.steampowered.com/app/440/Team_Fortress_2/",
-            "https://store.steampowered.com/app/10/CounterStrike/"
+            "https://store.steampowered.com/app/2499620/The_Leverage_Game/",
+            "https://store.steampowered.com/app/2504210/The_Leverage_Game_Business_Edition/",
+            "https://store.steampowered.com/app/1200520/Ascent_FreeRoaming_VR_Experience/",
+            "https://store.steampowered.com/app/253670/Aartform_Curvy_3D_30/",
+            "https://store.steampowered.com/app/502570/Houdini_Indie/"
         ]
 
         for idx, game in enumerate(games):
@@ -174,3 +171,13 @@ class GameScreen:
         graph_label = ctk.CTkLabel(graph_frame, image=graph_photo, text="")
         graph_label.image = graph_photo
         graph_label.pack()
+
+def main():
+    root = ctk.CTk()
+    root.title("Game Recommendation System")
+    root.geometry("900x700")
+    app = GameScreen(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
