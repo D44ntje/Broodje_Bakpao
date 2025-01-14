@@ -184,13 +184,3 @@ class GameScreen:
         graph_label = ctk.CTkLabel(graph_frame, image=graph_photo, text="")
         graph_label.image = graph_photo
         graph_label.pack()
-
-def main():
-    root = ctk.CTk()
-    root.title("Game Recommendation System")
-    root.geometry("900x700")
-    app = GameScreen(root)
-    root.mainloop()
-
-if __name__ == "__main__":
-    main()
