@@ -7,7 +7,6 @@ from PIL import Image, ImageTk
 import os
 import webbrowser
 
-
 class GameScreen:
     def __init__(self, parent):
         self.parent = parent
@@ -22,9 +21,6 @@ class GameScreen:
         self.main_frame.grid_rowconfigure(1, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
 
-        self.add_expanding_segment(self.main_frame, "Recommended by friends",
-                                   "This section shows games recommended by your friends.", row=0)
-
         section_frame = ctk.CTkFrame(self.main_frame, fg_color="#1B2838", corner_radius=10)
         section_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
@@ -32,9 +28,10 @@ class GameScreen:
         self.scrollable_frame.pack(pady=20, padx=20, fill="both", expand=True)
 
         all_games_data, b0, b1 = self.generate_graph()
-        self.most_popular_games, self.most_expensive_games = self.get_top_games(all_games_data, b0, b1)
+        self.most_popular_games, self.most_expensive_games = self.get_top_games()
 
         self.add_top_games_segment(self.scrollable_frame, "Top 5 worldwide", self.most_popular_games)
+        self.add_top_games_segment(self.scrollable_frame, "Top 5 most expensive", self.most_expensive_games)
         self.display_graph(self.scrollable_frame)
 
     def generate_graph(self):
@@ -105,17 +102,25 @@ class GameScreen:
 
         return all_games_data, b0, b1
 
-    def get_top_games(self, all_games_data, b0, b1):
+    def get_top_games(self):
         """
-        Returns the top 5 most popular and most expensive games.
+        Returns the predefined top 5 most popular and most expensive games.
         """
-        def predict(x):
-            return b0 + b1 * x
+        most_popular_games = [
+            ("Dota 2", "NA", "Free", 0),
+            ("New World Aeternum", "NA", "$39.99", 0),
+            ("PUBG BATTLEGROUNDS", "NA", "$29.99", 0),
+            ("Team Fortress 2", "NA", "Free", 0),
+            ("Counter-Strike", "NA", "$9.99", 0)
+        ]
 
-        games_data = [(name, owners, price, predict(int(owners.split(' - ')[0]) if ' - ' in owners else int(owners.replace(',', '')))) for name, owners, price in all_games_data]
-
-        most_popular_games = sorted(games_data, key=lambda x: int(x[1].split(' - ')[0]) if ' - ' in x[1] else int(x[1].replace(',', '')), reverse=True)[:5]
-        most_expensive_games = sorted(games_data, key=lambda x: float(x[2]), reverse=True)[:5]
+        most_expensive_games = [
+            ("The Leverage Game", "NA", "$1,000.00", 0),
+            ("The Leverage Game: Business Edition", "NA", "$1,200.00", 0),
+            ("Ascent Free-Roaming VR Experience", "NA", "$999.00", 0),
+            ("Aartform Curvy 3D 3.0", "NA", "$599.00", 0),
+            ("Houdini Indie", "NA", "$399.00", 0)
+        ]
 
         return most_popular_games, most_expensive_games
 
@@ -136,15 +141,20 @@ class GameScreen:
         title_label = ctk.CTkLabel(segment_frame, text=title, font=("Arial", 18), text_color="white")
         title_label.pack(anchor="w", padx=10)
 
-        urls = [
-            "https://store.steampowered.com/app/570/Dota_2/",
-            "https://store.steampowered.com/app/1063730/New_World_Aeternum/",
-            "https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/",
-            "https://store.steampowered.com/app/440/Team_Fortress_2/",
-            "https://store.steampowered.com/app/10/CounterStrike/"
-        ]
+        urls = {
+            "Dota 2": "https://store.steampowered.com/app/570/Dota_2/",
+            "New World Aeternum": "https://store.steampowered.com/app/1063730/New_World_Aeternum/",
+            "PUBG BATTLEGROUNDS": "https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/",
+            "Team Fortress 2": "https://store.steampowered.com/app/440/Team_Fortress_2/",
+            "Counter-Strike": "https://store.steampowered.com/app/10/CounterStrike/",
+            "The Leverage Game": "https://store.steampowered.com/app/2499620/The_Leverage_Game/",
+            "The Leverage Game: Business Edition": "https://store.steampowered.com/app/2504210/The_Leverage_Game_Business_Edition/",
+            "Ascent Free-Roaming VR Experience": "https://store.steampowered.com/app/1200520/Ascent_FreeRoaming_VR_Experience/",
+            "Aartform Curvy 3D 3.0": "https://store.steampowered.com/app/253670/Aartform_Curvy_3D_30/",
+            "Houdini Indie": "https://store.steampowered.com/app/502570/Houdini_Indie/"
+        }
 
-        for idx, game in enumerate(games):
+        for game in games:
             row_frame = ctk.CTkFrame(segment_frame, fg_color="transparent")
             row_frame.pack(fill="x", padx=10, pady=5)
 
@@ -157,7 +167,7 @@ class GameScreen:
                 row_frame,
                 text="Click for more information!",
                 width=200,
-                command=lambda url=urls[idx]: webbrowser.open(url)
+                command=lambda url=urls.get(game[0], "#"): webbrowser.open(url)
             )
             info_button.pack(side="right", padx=10)
 
